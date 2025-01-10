@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+	  "module": "Node16", 
+	  "target": "ES2022",
+	  "lib": ["ES2022"],
+	  "sourceMap": true,
+	  "rootDir": "src",
+	  "strict": true,
+	  "allowJs": false,
+	  "esModuleInterop": true,
+	  "skipLibCheck": true,
+	  "skipDefaultLibCheck": true, 
+	  "moduleResolution": "node16"
+	},
+	"exclude": [
+	  "esbuild.js",
+	  "eslint.config.mjs",
+	  "node_modules"
+	]
+  }
+  
