@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { associtedTestCaseToAutomation } from '@thecollege/azure-test-track';
 import * as path from 'path';
+const testTypes = ['Unit', 'Component', "API", "E2E"];
 
 export function activate(context: vscode.ExtensionContext) {
     const associateTestCommand = vscode.commands.registerCommand('extension.associateTestCase', async () => {
@@ -23,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        const testCaseType = await vscode.window.showQuickPick(['Unit', 'Component', "E2E"], { placeHolder: 'Choose the Test Type' });
+        const testCaseType = await vscode.window.showQuickPick(testTypes, { placeHolder: 'Choose the Test Type' });
         if (testCaseType === undefined) {
             return;
         }
@@ -53,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        const testCaseType = await vscode.window.showQuickPick(['Unit', 'Component', "E2E"], { placeHolder: 'Choose the Test Type' });
+        const testCaseType = await vscode.window.showQuickPick(testTypes, { placeHolder: 'Choose the Test Type' });
         if (testCaseType === undefined) {
             return;
         }
@@ -75,10 +76,25 @@ export function activate(context: vscode.ExtensionContext) {
         if (editor) {
             const position = editor.selection.active;
             const lineText = editor.document.lineAt(position.line).text;
+            const language = editor.document.languageId;
+            console.log(`Detected language: ${language}`);
 
-            const isTestLine = /^(test|it)\(/.test(lineText);
+            let isTestLine = false;
+    
+            if (language === "python") {
+                isTestLine = /^def\s+test_\w*\s*\(/.test(lineText);
+            } else if (language === "javascript" || language === "typescript") {
+                isTestLine = /^(test|it)\(/.test(lineText);
+            }
+
             const contextKey = 'editorHasTestCase';
             vscode.commands.executeCommand('setContext', contextKey, isTestLine); 
+            
+            console.log({
+                lineText,
+                language,
+                isTestLine,
+            });
         }
     });;
 }
@@ -118,22 +134,31 @@ function extractTestCaseName(editor: vscode.TextEditor, startLine: number): stri
 
     while (line < editor.document.lineCount) {
         const currentLine = editor.document.lineAt(line).text.trim();
+        const language = editor.document.languageId;
+
+        if (language === 'python') {
+            const pythonMatch = /^def\s+(test_\w+)\s*\(/.exec(currentLine);
+            if (pythonMatch) {
+                testCaseName = pythonMatch[1];
+                break;
+            }
+        } else if (language === 'javascript' || language === 'typescript') {
+            if (collecting) {
+                testCaseName += currentLine;
+            }
+    
+            if (/^(test|it)\s*\(/.test(currentLine)) {
+                collecting = true; 
+                testCaseName = currentLine; 
+            }
+    
+            const match = /'(.*?)'/.exec(testCaseName); 
+            if (match) {
+                testCaseName = match[1]; 
+                break;
+            }    
+        }
         
-        if (collecting) {
-            testCaseName += currentLine;
-        }
-
-        if (/^(test|it)\s*\(/.test(currentLine)) {
-            collecting = true; 
-            testCaseName = currentLine; 
-        }
-
-        const match = /'(.*?)'/.exec(testCaseName); 
-        if (match) {
-            testCaseName = match[1]; 
-            break;
-        }
-
         line++;
     }
 

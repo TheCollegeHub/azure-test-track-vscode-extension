@@ -1,9 +1,9 @@
 {
-  "name": "azure-test-track-vscode-extension",
-  "displayName": "azure-test-track-vscode-extension",
+  "name": "azure-test-track",
+  "displayName": "Azure Test Track",
   "publisher": "araujosnathan",
   "description": "Effortlessly associate your tests with Azure DevOps test cases directly from Visual Studio Code! This extension streamlines your workflow by allowing you to link tests to test cases without leaving your editor. Perfect for developers and QAs working with automated testing and Azure DevOps.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "icon": "extension-logo.png",
   "engines": {
     "vscode": "^1.95.0"
@@ -14,7 +14,8 @@
   "activationEvents": [
   "onTestingExplorer",
   "onLanguage:typescript",
-  "onLanguage:javascript"
+  "onLanguage:javascript",
+  "onLanguage:python"
 ],
 
   "main": "./dist/extension.js",

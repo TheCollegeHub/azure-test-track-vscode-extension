@@ -1,8 +1,8 @@
-# azure-test-track-vscode-extension
+# Azure Test Track - Extension (VS CODE)
 
 It is an extension designed to simplify the integration between your automated tests and Azure DevOps. It allows you to easily associate your tests with Azure DevOps test cases, automatically populating the Associated Automation tab with all relevant information and updating the automation status to Automated. This tool aims to enhance traceability and efficiency in the testing process, ensuring quick and accurate linking between code and tests in Azure DevOps.
 
-To know more about the full package of `azure-test-track` and know more things you can do, please, check this link: [azure-test-track](https://github.com/TheCollegeHub/azure-test-trackazure-test-track)
+To know more about the full package of `azure-test-track` and know more things you can do, please, check this link: [azure-test-track](https://github.com/TheCollegeHub/azure-test-track)
 
 ## Features
 
@@ -54,7 +54,7 @@ After filling in all the details, the extension will associate the test case wit
 
 ## Known Issues
 
-- Currently, the extension only supports associating tests based on text patterns such as `test(` or `it(` for filling Test Case Name automacatlly but you can still use this extension and fill the name manually through command `Associate Test to Azure DevOps filling Test Name`  
+- Currently, the extension only supports associating tests based on text patterns such as `test(`, `it(` or `def test_` - *if you see it works for javascript, typescript and python* - for filling Test Case Name automatically but you can still use this extension and fill the name manually through command `Associate Test to Azure DevOps filling Test Name`  
 - There may be issues with environment variable configurations not being recognized when VS Code is run in certain environments.
 
 ## Release Notes
