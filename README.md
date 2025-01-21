@@ -58,9 +58,8 @@ After filling in all the details, the extension will associate the test case wit
 - There may be issues with environment variable configurations not being recognized when VS Code is run in certain environments.
 
 ## Release Notes
-### 1.0.0
 
-Initial release of azure-test-track with basic functionality to associate tests with Azure DevOps test cases.
+See the [ChangeLog](CHANGELOG.md)
 
 -----
 **Enjoy!**
