@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/TheCollegeHub/azure-test-track-vscode-extension/blob/main/extension-logo.png" width="400" style="height: auto; display: block; margin: 0 auto;">
+</p>
+
 # Azure Test Track - Extension (VS CODE)
 
 It is an extension designed to simplify the integration between your automated tests and Azure DevOps. It allows you to easily associate your tests with Azure DevOps test cases, automatically populating the Associated Automation tab with all relevant information and updating the automation status to Automated. This tool aims to enhance traceability and efficiency in the testing process, ensuring quick and accurate linking between code and tests in Azure DevOps.
