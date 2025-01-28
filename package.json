@@ -3,7 +3,7 @@
   "displayName": "Azure Test Track",
   "publisher": "araujosnathan",
   "description": "Effortlessly associate your tests with Azure DevOps test cases directly from Visual Studio Code! This extension streamlines your workflow by allowing you to link tests to test cases without leaving your editor. Perfect for developers and QAs working with automated testing and Azure DevOps.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "icon": "extension-logo.png",
   "engines": {
     "vscode": "^1.95.0"
@@ -12,12 +12,12 @@
     "Other"
   ],
   "activationEvents": [
-  "onTestingExplorer",
-  "onLanguage:typescript",
-  "onLanguage:javascript",
-  "onLanguage:python"
-],
-
+    "onTestingExplorer",
+    "onLanguage:typescript",
+    "onLanguage:javascript",
+    "onLanguage:python",
+    "onDidOpenTextDocument"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -29,6 +29,16 @@
       {
         "command": "extension.associateTestCaseCustom",
         "title": "Associate Test to Azure DevOps filling Test Name",
+        "category": "Azure Test Track"
+      },
+      {
+        "command": "extension.associateTestCaseIdsFromComments",
+        "title": "Associate IDs from Comments",
+        "category": "Azure Test Track"
+      },
+      {
+        "command": "extension.setDecorationsForAssociatedAutomatedTests",
+        "title": "View/Hide All Associated Automated Tests",
         "category": "Azure Test Track"
       }
     ],
@@ -46,7 +56,7 @@
           "group": "navigation",
           "when": "editorTextFocus && editorHasTestCase"
         }
-    ]
+      ]
     }
   },
   "scripts": {
@@ -80,5 +90,5 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TheCollegeHub/azure-test-track-vscode-extension.git"
-}
+  }
 }

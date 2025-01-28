@@ -1,74 +1,50 @@
 import * as vscode from 'vscode';
-import { associtedTestCaseToAutomation } from '@thecollege/azure-test-track';
-import * as path from 'path';
-const testTypes = ['Unit', 'Component', "API", "E2E"];
+import { associateTestCaseCommand, associateTestCaseCustomCommand, associateTestCaseIdsFromComments, setDecorationsForAssociatedAutomatedTests } from './commands/commands';
+import { associatedDecoration, unassociatedDecoration } from './decorators/association-decoretor';
+let decorationsVisible = false;
+
+function getEditor() {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        vscode.window.showErrorMessage('No file is open.');
+        return;
+    }
+    return editor;
+}
 
 export function activate(context: vscode.ExtensionContext) {
     const associateTestCommand = vscode.commands.registerCommand('extension.associateTestCase', async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage('No file is open.');
-            return;
-        }
-
-        const position = editor.selection.active;
-
-        let testCaseName = extractTestCaseName(editor, position.line);
-        if (!testCaseName) {
-            vscode.window.showErrorMessage('Unable to extract test case name.');
-            return;
-        }
-
-        const testCaseId = await vscode.window.showInputBox({ prompt: 'Enter the Test Case ID in Azure DevOps' });
-        if (testCaseId === undefined) {
-            return;
-        }
-
-        const testCaseType = await vscode.window.showQuickPick(testTypes, { placeHolder: 'Choose the Test Type' });
-        if (testCaseType === undefined) {
-            return;
-        }
-
-        if (!testCaseId || !testCaseName || !testCaseType) {
-            vscode.window.showErrorMessage('Incomplete information. Association canceled.');
-            return;
-        }
-
-        await associateTestCase(testCaseId, testCaseName, testCaseType);
+        const editor = getEditor();
+        await associateTestCaseCommand(editor!);
     });
 
     const associateTestCommandCustom = vscode.commands.registerCommand('extension.associateTestCaseCustom', async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage('No file is open.');
-            return;
-        }
+        await associateTestCaseCustomCommand();
+    });
 
-        const testCaseId = await vscode.window.showInputBox({ prompt: 'Enter the Test Case ID in Azure DevOps' });
-        if (testCaseId === undefined) {
-            return;
-        }
+    const associateTestCaseIdsCommand = vscode.commands.registerCommand('extension.associateTestCaseIdsFromComments', async () => {
+        const editor = getEditor();
+        await associateTestCaseIdsFromComments(editor!);
+    });
 
-        const testCaseName = await vscode.window.showInputBox({ prompt: 'Enter the Test Case Name in Azure DevOps' });
-        if (testCaseId === undefined) {
-            return;
+    const setDecorationsForAssociatedAutomatedTestsCommand = vscode.commands.registerCommand('extension.setDecorationsForAssociatedAutomatedTests', async () => {
+        const editor = getEditor();
+    
+        if (decorationsVisible) {
+            editor!.setDecorations(associatedDecoration, []);
+            editor!.setDecorations(unassociatedDecoration, []);
+        } else {
+            await setDecorationsForAssociatedAutomatedTests(editor!);
         }
+        decorationsVisible = !decorationsVisible;
 
-        const testCaseType = await vscode.window.showQuickPick(testTypes, { placeHolder: 'Choose the Test Type' });
-        if (testCaseType === undefined) {
-            return;
-        }
-
-        if (!testCaseId || !testCaseName || !testCaseType) {
-            vscode.window.showErrorMessage('Incomplete information. Association canceled.');
-            return;
-        }
-
-        await associateTestCase(testCaseId, testCaseName, testCaseType);
+     
     });
 
     context.subscriptions.push(associateTestCommand);
     context.subscriptions.push(associateTestCommandCustom);
+    context.subscriptions.push(associateTestCaseIdsCommand);
+    context.subscriptions.push(setDecorationsForAssociatedAutomatedTestsCommand);
 
 
     vscode.window.onDidChangeTextEditorSelection((e) => {
@@ -95,89 +71,9 @@ export function activate(context: vscode.ExtensionContext) {
                 language,
                 isTestLine,
             });
+            
         }
     });;
-}
-
-async function associateTestCase(testCaseId: string, testCaseName: string, testCaseType: string) {
-    try {
-
-        const organization = process.env.ADO_ORGANIZATION;
-        const project = process.env.ADO_PROJECT;
-        const token = process.env.ADO_PERSONAL_ACCESS_TOKEN;
-        const email = process.env.ADO_COMPANY_EMAIL;
-    
-        if (!organization || !project || !token || !email) {
-            vscode.window.showErrorMessage('Environment variables are not configured correctly.');
-            return;
-        }
-
-        await associtedTestCaseToAutomation(
-            testCaseId,
-            testCaseName,
-            testCaseType
-        );
-        vscode.window.showInformationMessage(`Test successfully associated with test case ${testCaseId}!`);
-    } catch (error) {
-        if (error instanceof Error) {
-            vscode.window.showErrorMessage(`Error associating test: ${error.message}`);
-        } else {
-            vscode.window.showErrorMessage('Error associating test: unknown error.');
-        }
-    }
-}
-
-function extractTestCaseName(editor: vscode.TextEditor, startLine: number): string | null {
-    let testCaseName = '';
-    let line = startLine;
-    let collecting = false;
-
-    while (line < editor.document.lineCount) {
-        const currentLine = editor.document.lineAt(line).text.trim();
-        const language = editor.document.languageId;
-
-        if (language === 'python') {
-            const pythonMatch = /^def\s+(test_\w+)\s*\(/.exec(currentLine);
-            if (pythonMatch) {
-                testCaseName = pythonMatch[1];
-                break;
-            }
-        } else if (language === 'javascript' || language === 'typescript') {
-            if (collecting) {
-                testCaseName += currentLine;
-            }
-    
-            if (/^(test|it)\s*\(/.test(currentLine)) {
-                collecting = true; 
-                testCaseName = currentLine; 
-            }
-    
-            const match = /'(.*?)'/.exec(testCaseName); 
-            if (match) {
-                testCaseName = match[1]; 
-                break;
-            }    
-        }
-        
-        line++;
-    }
-
-    if (testCaseName) {
-        
-        const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-        const fileName = editor.document.fileName;
-
-        const projectRoot = path.basename(workspaceFolder!); 
-
-       
-        if (workspaceFolder && fileName.startsWith(workspaceFolder)) {
-            const relativePath = fileName.substring(workspaceFolder.length + 1); 
-            const relativeProjectPath = path.posix.join(projectRoot, relativePath);
-            return `${relativeProjectPath} - "${testCaseName}"`;
-        }
-    }
-
-    return null;
 }
 
 export function deactivate() {}

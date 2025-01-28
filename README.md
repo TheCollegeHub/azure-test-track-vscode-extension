@@ -15,8 +15,10 @@ The azure-test-track extension provides functionalities for associating automate
 - Automatically associates test cases with the related automation code.
 - Supports associating test cases based on pre-defined automation test names.
 - Allows users to manually associate tests by specifying the test case ID and name.
-- Supports multiple test types: Unit, Component, and E2E.
+- Supports multiple test types: Unit, Component, API, and E2E.
 - Provides a convenient way to integrate with Azure DevOps and track test cases.
+- Automatically associates all automated tests with the Azure Test Cases for all file via comments.
+- The extension provides clear visual indicators that show which Azure Test Cases are actually associated with the automated tests.
 
     Tip: You can use this extension to streamline your testing process in Azure DevOps, improving the traceability and automation of test management.
 
@@ -50,7 +52,17 @@ To associate a test case manually, follow these steps:
 
 After filling in all the details, the extension will associate the test case with the specified automation code.
 
+### Option 3
+1. **Insert the comments**: In the test file, add the ***comments*** with the test IDs in the format `ADO_IDs: TC_1234, TC_5678` above the test function.
+2. **Use the command palette:** Alternatively, press Ctrl+Shift+P (Windows/Linux) or Cmd+Shift+P (macOS), type `Associate IDs from Comments`, and select the ***Test Type*** for the associations.
+
+After the command is executed, it will scan for all `ADO_IDs` and associates all ids with the automated test in `Azure Test Case`
+
 **Note:** In your Azure Devops Test Case, the `Associated Automation` tab will be filled with all this informations and the `Automation Status` will be changed by `Automated`.
+
+## Visualization Option
+1. In the test file, run the `View/Hide All Associated Automated Tests` command.
+2. Look at your code. Lines of code associated with test cases will have a green indicator `✓ Associated`, and unassociated lines will have a red indicator `✗ Unassociated`.
 
 ## Known Issues
 
@@ -59,7 +71,7 @@ After filling in all the details, the extension will associate the test case wit
 
 ## Release Notes
 
-See the [ChangeLog](CHANGELOG.md)
+For more details, See the [ChangeLog](CHANGELOG.md).
 
 -----
 **Enjoy!**
