@@ -1,5 +1,21 @@
 # Change Log
-## 1.2.0
+## v1.2.2
+
+### Bug Fixes:
+- **Fixed issue with decorations not persisting when switching between files:** Previously, when switching between files that had decorations, the decorations would be lost. This issue has been resolved, and decorations are now properly maintained even when navigating between files.
+
+- **Fixed issue with decorations being applied to the wrong file when toggling Show/Hide:** When toggling the "Show/Hide" action, the decorations were being applied to the wrong file (the file where the user left). Now, the decorations are correctly applied only to the active file, preventing unwanted appearance/disappearance of decorations on other files.
+
+- **Fixed issue where decorations from a test with ADO_IDs were applied to the next test without ADO_IDs:** Previously, if a test case had ADO_IDs and the test below it didn't have ADO_IDs, the decoration from the test above would incorrectly appear on the second test. This has been fixed so that tests without ADO_IDs do not inherit decorations from tests above them that have ADO_IDs.
+
+- **Fixed issue with decorations not updating correctly when new IDs are added:** Previously, when new ADO_IDs were added to the test case, the decorations wouldn't update. Now, the decorations correctly reflect the newly added IDs.
+
+- **Resolved problem with removed IDs still showing in decorations:** When an ID is removed from the test case, it no longer appears in the decorations. The cache and editor decorations are properly updated to reflect the removal of IDs.
+
+### Improvements:
+- **Improved cache and decoration management:** The cache is now properly updated when test case IDs are added or removed. Decorations are correctly re-applied after each change, ensuring that only valid, associated IDs are displayed, while removed or invalid IDs are no longer shown. This ensures the proper handling of both associated and unassociated test case IDs in the editor.
+
+## v1.2.0
 
 ### **New Features** 
 
@@ -60,7 +76,7 @@ The associations are visually displayed within the editor, making it easy to see
 **Note:** If you update the content (e.g., add new comments or modify the existing associations), the decorations may not immediately reflect the changes.
 To refresh and view the updated associations, use the `View/Hide All Associated Automated Tests` command again. This will ensure that the editor correctly refreshes the state and displays the new associations or updates. 
 
-## 1.1.0
+## v1.1.0
 ### Added
 
 - **Python support:** The extension now recognizes test functions in Python, specifically those defined with `def test_`.
@@ -70,7 +86,7 @@ To refresh and view the updated associations, use the `View/Hide All Associated 
 ### Improved
 - **Test name extraction:** Enhanced test name extraction to support both JavaScript/TypeScript (`test() or it()`) and Python (`def test_`).
 
-## 1.0.0
+## v1.0.0
 
 Initial release of azure-test-track-vscode-extension with basic functionality to associate tests with Azure DevOps test cases.
 
