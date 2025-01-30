@@ -67,25 +67,48 @@ export function extractTestCaseNamesFromDocument(editor: vscode.TextEditor): { t
 
 export function extractTestCaseIds(editor: vscode.TextEditor, line: number): string[] | null {
     const document = editor.document;
-    let testCaseIds: string[] = [];
+    let testCaseIds: string[] | null = null;
+    const language = editor.document.languageId;
 
-    for (let i = line - 1; i >= 0; i--) {
-        const text = document.lineAt(i).text;
+    const currentLineText = document.lineAt(line - 1).text;
+    const match = currentLineText.match(/ADO_IDs:\s*((?:TC_\d+,?\s*)+)/);
 
-        const match = text.match(/ADO_IDs:\s*((?:TC_\d+,?\s*)+)/);
-
-        if (match) {
-            const ids = match[0].match(/TC_(\d+)/g);
-
-            if (ids) {
-                testCaseIds = ids.map((id) => id.replace('TC_', '').trim());
-            }
+    if (match) {
+        const ids = match[0].match(/TC_(\d+)/g);
+        if (ids) {
+            testCaseIds = ids.map(id => id.replace('TC_', '').trim());
         }
-        if (testCaseIds.length > 0) { break; }
     }
 
-    return testCaseIds.length > 0 ? testCaseIds : null;
+    if (!testCaseIds) {
+        const startLine = Math.max(0, line - 10);
+        for (let i = line - 2; i >= startLine; i--) {
+            const text = document.lineAt(i).text.trim();
+
+            if (language === 'python') {
+                if (/^def\s+(test_\w+)\s*\(/.test(text)) {
+                    break;
+                }
+            } else if (language === 'javascript' || language === 'typescript') {
+                if (/^(test\(|it\()/.test(text)) {
+                    break;
+                }
+            }
+
+            const match = text.match(/ADO_IDs:\s*((?:TC_\d+,?\s*)+)/);
+            if (match) {
+                const ids = match[0].match(/TC_(\d+)/g);
+                if (ids) {
+                    testCaseIds = ids.map(id => id.replace('TC_', '').trim());
+                    break;
+                }
+            }
+        }
+    }
+
+    return testCaseIds;
 }
+
 
 export function applyRelativePathToTestCaseName(editor: vscode.TextEditor, testCaseName: string){
     if (testCaseName) {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { associateTestCaseCommand, associateTestCaseCustomCommand, associateTestCaseIdsFromComments, setDecorationsForAssociatedAutomatedTests } from './commands/commands';
 import { associatedDecoration, unassociatedDecoration } from './decorators/association-decoretor';
-let decorationsVisible = false;
+let decoratedEditors = new Map<string, boolean>();
 
 function getEditor() {
     const editor = vscode.window.activeTextEditor;
@@ -29,16 +29,18 @@ export function activate(context: vscode.ExtensionContext) {
 
     const setDecorationsForAssociatedAutomatedTestsCommand = vscode.commands.registerCommand('extension.setDecorationsForAssociatedAutomatedTests', async () => {
         const editor = getEditor();
-    
-        if (decorationsVisible) {
+
+        const filePath = editor!.document.uri.fsPath;
+        const isDecorated = decoratedEditors.get(filePath) ?? false;
+
+        if (isDecorated) {
             editor!.setDecorations(associatedDecoration, []);
             editor!.setDecorations(unassociatedDecoration, []);
+            decoratedEditors.delete(filePath);
         } else {
             await setDecorationsForAssociatedAutomatedTests(editor!);
+            decoratedEditors.set(filePath, true);
         }
-        decorationsVisible = !decorationsVisible;
-
-     
     });
 
     context.subscriptions.push(associateTestCommand);
@@ -73,7 +75,18 @@ export function activate(context: vscode.ExtensionContext) {
             });
             
         }
-    });;
+    });
+
+    vscode.window.onDidChangeActiveTextEditor((editor) => {
+        if (!editor) { return; }
+
+        const filePath = editor.document.uri.fsPath;
+        const isDecorated = decoratedEditors.get(filePath) ?? false;
+
+        if (isDecorated) {
+            setDecorationsForAssociatedAutomatedTests(editor);
+        }
+    });
 }
 
 export function deactivate() {}
