@@ -3,7 +3,7 @@ import { applyRelativePathToTestCaseName, extractTestCaseIds, extractTestCaseNam
 import { getWorkItemById } from "@thecollege/azure-test-track";
 import { associateTestCase } from './association';
 import { associatedDecoration, unassociatedDecoration } from '../decorators/association-decoretor';
-import { checkEnvironmentVariables } from '../utils/utils';
+import { checkEnvironmentVariables, showErrorInStatusBar } from '../utils/utils';
 const testTypes = ['Unit', 'Component', "API", "E2E"];
 
 const cache = new Map<string, { testCaseId: string; isAssociated: boolean }[]>();
@@ -80,7 +80,7 @@ export async function associateTestCaseIdsFromComments(editor: vscode.TextEditor
         const testCaseIds = extractTestCaseIds(editor, lineNumber);
 
         if (!testCaseIds) {
-            vscode.window.showErrorMessage(`No ADO_ID found above the test case '${testCaseName}'.`);
+            showErrorInStatusBar(`No ADO_ID found above the test case '${testCaseName}'.`);
             continue;
         }
 
@@ -94,10 +94,11 @@ export async function associateTestCaseIdsFromComments(editor: vscode.TextEditor
 
 export async function setDecorationsForAssociatedAutomatedTests(editor: vscode.TextEditor) {
     const testCaseNames = extractTestCaseNamesFromDocument(editor);
+    let foundIds = false;
 
     if (testCaseNames.length === 0) {
         vscode.window.showErrorMessage('No test cases found in the file.');
-        return;
+        return 0;
     }
 
     const associatedLines: vscode.Range[] = [];
@@ -117,9 +118,33 @@ export async function setDecorationsForAssociatedAutomatedTests(editor: vscode.T
         const testCaseIds = extractTestCaseIds(editor, lineNumber);
 
         if (!testCaseIds) {
-            vscode.window.showErrorMessage(`No ADO_ID found above the test case '${testCaseName}'.`);
+            showErrorInStatusBar(`No ADO_ID found above the test case '${testCaseName}'.`);
             continue;
         }
+
+        foundIds = true;
+
+        const existingEntries = cache.get(testCaseName) || [];
+        const existingIds = new Set(existingEntries.map(entry => entry.testCaseId));
+
+        //Add new ADO_IDs to cache that were added in the file
+        testCaseIds.forEach(testCaseId => {
+            if (!existingIds.has(testCaseId)) {
+                existingEntries.push({ testCaseId, isAssociated: false });
+            }
+        });
+
+        //Remove ADO_IDs from cache that were removed from the file
+        const idsToRemove = existingEntries.filter(entry => !testCaseIds.includes(entry.testCaseId));
+        idsToRemove.forEach(entry => {
+            const index = existingEntries.indexOf(entry);
+            if (index !== -1) {
+                existingEntries.splice(index, 1);
+            }
+        });
+
+
+        cache.set(testCaseName, existingEntries);
 
         if (!cacheEntries.length) {
           
@@ -149,6 +174,11 @@ export async function setDecorationsForAssociatedAutomatedTests(editor: vscode.T
         });
 
         await Promise.all(statusPromises);
+    }
+
+    if (!foundIds) {
+        showErrorInStatusBar(`No ADO_IDs found in the file.`);
+        return 0;
     }
 
     if (associatedLines.length > 0) {
@@ -217,4 +247,5 @@ export async function setDecorationsForAssociatedAutomatedTests(editor: vscode.T
     
         editor.setDecorations(unassociatedDecoration, unassociatedDecorations);
     }
+    return 1;
 }

@@ -38,8 +38,8 @@ export function activate(context: vscode.ExtensionContext) {
             editor!.setDecorations(unassociatedDecoration, []);
             decoratedEditors.delete(filePath);
         } else {
-            await setDecorationsForAssociatedAutomatedTests(editor!);
-            decoratedEditors.set(filePath, true);
+            const isSet = await setDecorationsForAssociatedAutomatedTests(editor!);
+            decoratedEditors.set(filePath, isSet ? true: false);
         }
     });
 

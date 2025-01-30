@@ -11,3 +11,11 @@ export function checkEnvironmentVariables() {
         return;
     }
 }
+
+export function showErrorInStatusBar(message: string, duration: number = 5000) {
+    const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+    statusBarItem.text = `$(error) ${message}`;
+    statusBarItem.color = new vscode.ThemeColor('errorForeground'); 
+    statusBarItem.show();
+    setTimeout(() => statusBarItem.dispose(), duration);
+}
