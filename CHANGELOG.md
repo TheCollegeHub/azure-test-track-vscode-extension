@@ -1,5 +1,10 @@
 # Change Log
 
+## v1.3.2
+
+### Bug Fixes:
+- **Fixed issue with not identifying js/ts tests using double quotes:** Previously, Javascript and Typescript test names weren't being identified if they used double quotes, only single quotes were detected. This issue has been resolved to correctly find tests regardless of the quote style.
+
 ## v1.3.1
 
 ### **New Features**

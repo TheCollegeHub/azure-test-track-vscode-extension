@@ -26,7 +26,7 @@ export function extractTestCaseName(editor: vscode.TextEditor, startLine: number
                 testCaseName = currentLine; 
             }
     
-            const match = /'(.*?)'/.exec(testCaseName); 
+            const match = /["'](.*?)["']/.exec(testCaseName); 
             if (match) {
                 testCaseName = match[1]; 
                 break;
@@ -59,7 +59,7 @@ export function extractTestCaseNamesFromDocument(editor: vscode.TextEditor): { t
                 testCaseNames.push({ testCaseName: pythonMatch[1], lineNumber: line });
             }
         } else if (language === 'javascript' || language === 'typescript') {
-            const match = /'(.*?)'/.exec(currentLine);
+            const match = /["'](.*?)["']/.exec(currentLine);
             if (/^(test|it)\s*\(/.test(currentLine) && match) {
                 testCaseNames.push({ testCaseName: match[1], lineNumber: line });
             }
